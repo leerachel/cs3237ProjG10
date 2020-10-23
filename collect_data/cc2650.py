@@ -11,9 +11,12 @@ Adapted by Ashwin from the following sources:
 import asyncio
 import platform
 import struct
+import datetime
 
 from bleak import BleakClient
 
+timestamp = datetime.datetime.now()
+timestamp = timestamp.isoformat()
 sensorPeriod = bytearray([0x0A]) #10Hz only implemented for Movement Sensor and Optical Sensor
 
 class Service:
@@ -133,7 +136,7 @@ class AccelerometerSensorMovementSensorMPU9250(MovementSensorMPU9250SubService):
     def cb_sensor(self, data, dict, read_count):
         '''Returns (x_accel, y_accel, z_accel) in units of g'''
         rawVals = data[3:6]
-        dict[MovementSensorMPU9250.ACCEL_LABEL][read_count] = tuple([ v*self.scale for v in rawVals ])
+        dict[MovementSensorMPU9250.ACCEL_LABEL][read_count] = tuple([ v*self.scale for v in rawVals ]+[timestamp])
         print("[MovementSensor] Accelerometer:", tuple([ v*self.scale for v in rawVals ]))
 
 
@@ -147,7 +150,7 @@ class MagnetometerSensorMovementSensorMPU9250(MovementSensorMPU9250SubService):
     def cb_sensor(self, data, dict, read_count):
         '''Returns (x_mag, y_mag, z_mag) in units of uT'''
         rawVals = data[6:9]
-        dict[MovementSensorMPU9250.MAG_LABEL][read_count] = tuple([ v*self.scale for v in rawVals ])
+        dict[MovementSensorMPU9250.MAG_LABEL][read_count] = tuple([ v*self.scale for v in rawVals ]+[timestamp])
         print("[MovementSensor] Magnetometer:", tuple([ v*self.scale for v in rawVals ]))
 
 
@@ -160,7 +163,7 @@ class GyroscopeSensorMovementSensorMPU9250(MovementSensorMPU9250SubService):
     def cb_sensor(self, data, dict, read_count):
         '''Returns (x_gyro, y_gyro, z_gyro) in units of degrees/sec'''
         rawVals = data[0:3]
-        dict[MovementSensorMPU9250.GYRO_LABEL][read_count] = tuple([ v*self.scale for v in rawVals ])
+        dict[MovementSensorMPU9250.GYRO_LABEL][read_count] = tuple([ v*self.scale for v in rawVals ]+[timestamp])
         print("[MovementSensor] Gyroscope:", tuple([ v*self.scale for v in rawVals ]))
 
 
@@ -177,7 +180,7 @@ class OpticalSensor(Sensor):
         m = raw & 0xFFF
         e = (raw & 0xF000) >> 12
         reading = 0.01 * (m << e)
-        self.dict[self.read_count] = reading
+        self.dict[self.read_count] = tuple([reading, timestamp])
         self.read_count += 1
         print("[OpticalSensor] Reading from light sensor:", reading)
 
