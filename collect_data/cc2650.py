@@ -14,6 +14,7 @@ import struct
 
 from bleak import BleakClient
 
+sensorPeriod = bytearray([0x0A]) #10Hz only implemented for Movement Sensor and Optical Sensor
 
 class Service:
     """
@@ -32,6 +33,8 @@ class Service:
         self.dict = {} # dict storing time to reading mapping
         self.data_uuid = None
         self.ctrl_uuid = None
+        self.period_uuid = None
+
 
 
 class Sensor(Service):
@@ -46,6 +49,7 @@ class Sensor(Service):
         write_value = bytearray([0x01])
         await client.write_gatt_char(self.ctrl_uuid, write_value)
 
+        await client.write_gatt_char(self.period_uuid, sensorPeriod)
         # listen using the handler
         await client.start_notify(self.data_uuid, self.callback)
 
@@ -84,6 +88,8 @@ class MovementSensorMPU9250(Sensor):
         super().__init__()
         self.data_uuid = "f000aa81-0451-4000-b000-000000000000"
         self.ctrl_uuid = "f000aa82-0451-4000-b000-000000000000"
+        self.period_uuid = "f000aa83-0451-4000-b000-000000000000"
+
         self.ctrlBits = 0
 
         self.sub_callbacks = []
@@ -99,6 +105,7 @@ class MovementSensorMPU9250(Sensor):
                       MovementSensorMPU9250.MAG_LABEL: {},
                       MovementSensorMPU9250.GYRO_LABEL:{}}
         await client.write_gatt_char(self.ctrl_uuid, bytearray(struct.pack("<H", self.ctrlBits)))
+        await client.write_gatt_char(self.period_uuid, sensorPeriod)
 
         # listen using the handler
         await client.start_notify(self.data_uuid, self.callback)
@@ -163,6 +170,7 @@ class OpticalSensor(Sensor):
         super().__init__()
         self.data_uuid = "f000aa71-0451-4000-b000-000000000000"
         self.ctrl_uuid = "f000aa72-0451-4000-b000-000000000000"
+        self.period_uuid = "f000aa73-0451-4000-b000-000000000000"
 
     def callback(self, sender: int, data: bytearray):
         raw = struct.unpack('<h', data)[0]
