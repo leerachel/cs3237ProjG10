@@ -11,6 +11,8 @@ from cc2650 import LEDAndBuzzer, \
                    MagnetometerSensorMovementSensorMPU9250, \
                    MovementSensorMPU9250
 
+from store import append_data_to_csv, read_data_from_csv
+
 load_dotenv()
 
 
@@ -37,17 +39,20 @@ async def start_sensor(address):
             if command == "start":
                 print("Starting sensors...")
                 cntr = 0
-                await light_sensor.start_listener(client)
-                await movement_sensor.start_listener(client)
                 await led_and_buzzer.notify(client, 0x07)
+                await movement_sensor.start_listener(client)
+                await light_sensor.start_listener(client)
                 while cntr < 5:
                     await asyncio.sleep(1.0)
                     print(f"Started reading for {cntr+1} second(s)")
                     cntr += 1
 
-                await light_sensor.stop_sensor(client)
-                await movement_sensor.stop_sensor(client)
+                light_dict = await light_sensor.stop_sensor(client)
+                final_dict = await movement_sensor.stop_sensor(client)
+                final_dict[OpticalSensor.LIGHT_LABEL] = light_dict
                 await led_and_buzzer.notify(client, 0x00)
+                append_data_to_csv("data.csv", final_dict)
+
 
             if command == "exit":
                 return

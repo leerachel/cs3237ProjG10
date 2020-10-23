@@ -28,6 +28,8 @@ class Service:
     """
 
     def __init__(self):
+        self.read_count = 0  # Tracks number of reads
+        self.dict = {} # dict storing time to reading mapping
         self.data_uuid = None
         self.ctrl_uuid = None
 
@@ -38,6 +40,8 @@ class Sensor(Service):
         raise NotImplementedError()
 
     async def start_listener(self, client, *args):
+        self.read_count = 0
+        self.dict = {}
         # start the sensor on the device
         write_value = bytearray([0x01])
         await client.write_gatt_char(self.ctrl_uuid, write_value)
@@ -49,6 +53,7 @@ class Sensor(Service):
         # stop the sensor on the device
         write_value = bytearray([0x00])
         await client.write_gatt_char(self.ctrl_uuid, write_value)
+        return self.dict
 
 
 class MovementSensorMPU9250SubService:
@@ -71,6 +76,9 @@ class MovementSensorMPU9250(Sensor):
     ACCEL_RANGE_4G  = 1 << 8
     ACCEL_RANGE_8G  = 2 << 8
     ACCEL_RANGE_16G = 3 << 8
+    ACCEL_LABEL = "accelerometer"
+    MAG_LABEL = "magnetometer"
+    GYRO_LABEL = "gyroscope"
 
     def __init__(self):
         super().__init__()
@@ -86,6 +94,10 @@ class MovementSensorMPU9250(Sensor):
 
     async def start_listener(self, client, *args):
         # start the sensor on the device
+        self.read_count = 0
+        self.dict = { MovementSensorMPU9250.ACCEL_LABEL: {},
+                      MovementSensorMPU9250.MAG_LABEL: {},
+                      MovementSensorMPU9250.GYRO_LABEL:{}}
         await client.write_gatt_char(self.ctrl_uuid, bytearray(struct.pack("<H", self.ctrlBits)))
 
         # listen using the handler
@@ -95,11 +107,14 @@ class MovementSensorMPU9250(Sensor):
         # stop the sensor on the device
         await client.write_gatt_char(self.ctrl_uuid, bytearray(b'\x00\x00'))
 
+        return self.dict
 
     def callback(self, sender: int, data: bytearray):
         unpacked_data = struct.unpack("<hhhhhhhhh", data)
         for cb in self.sub_callbacks:
-            cb(unpacked_data)
+            cb(unpacked_data, self.dict, self.read_count)
+
+        self.read_count += 1
 
 
 class AccelerometerSensorMovementSensorMPU9250(MovementSensorMPU9250SubService):
@@ -108,9 +123,10 @@ class AccelerometerSensorMovementSensorMPU9250(MovementSensorMPU9250SubService):
         self.bits = MovementSensorMPU9250.ACCEL_XYZ | MovementSensorMPU9250.ACCEL_RANGE_4G
         self.scale = 8.0/32768.0 # TODO: why not 4.0, as documented? @Ashwin Need to verify
 
-    def cb_sensor(self, data):
+    def cb_sensor(self, data, dict, read_count):
         '''Returns (x_accel, y_accel, z_accel) in units of g'''
         rawVals = data[3:6]
+        dict["accelerometer"][read_count] = tuple([ v*self.scale for v in rawVals ])
         print("[MovementSensor] Accelerometer:", tuple([ v*self.scale for v in rawVals ]))
 
 
@@ -121,9 +137,10 @@ class MagnetometerSensorMovementSensorMPU9250(MovementSensorMPU9250SubService):
         self.scale = 4912.0 / 32760
         # Reference: MPU-9250 register map v1.4
 
-    def cb_sensor(self, data):
+    def cb_sensor(self, data, dict, read_count):
         '''Returns (x_mag, y_mag, z_mag) in units of uT'''
         rawVals = data[6:9]
+        dict["magnetometer"][read_count] = tuple([ v*self.scale for v in rawVals ])
         print("[MovementSensor] Magnetometer:", tuple([ v*self.scale for v in rawVals ]))
 
 
@@ -133,13 +150,15 @@ class GyroscopeSensorMovementSensorMPU9250(MovementSensorMPU9250SubService):
         self.bits = MovementSensorMPU9250.GYRO_XYZ
         self.scale = 500.0/65536.0
 
-    def cb_sensor(self, data):
+    def cb_sensor(self, data, dict, read_count):
         '''Returns (x_gyro, y_gyro, z_gyro) in units of degrees/sec'''
         rawVals = data[0:3]
+        dict["gyroscope"][read_count] = tuple([ v*self.scale for v in rawVals ])
         print("[MovementSensor] Gyroscope:", tuple([ v*self.scale for v in rawVals ]))
 
 
 class OpticalSensor(Sensor):
+    LIGHT_LABEL = "light"
     def __init__(self):
         super().__init__()
         self.data_uuid = "f000aa71-0451-4000-b000-000000000000"
@@ -149,7 +168,10 @@ class OpticalSensor(Sensor):
         raw = struct.unpack('<h', data)[0]
         m = raw & 0xFFF
         e = (raw & 0xF000) >> 12
-        print("[OpticalSensor] Reading from light sensor:", 0.01 * (m << e))
+        reading = 0.01 * (m << e)
+        self.dict[self.read_count] = reading
+        self.read_count += 1
+        print("[OpticalSensor] Reading from light sensor:", reading)
 
 
 class HumiditySensor(Sensor):
