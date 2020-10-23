@@ -39,7 +39,7 @@ async def start_sensor(address):
             if command == "start":
                 print("Starting sensors...")
                 cntr = 0
-                await led_and_buzzer.notify(client, 0x07)
+                await led_and_buzzer.notify(client, 0x04) # buzzer only
                 await movement_sensor.start_listener(client)
                 await light_sensor.start_listener(client)
                 while cntr < 5:
