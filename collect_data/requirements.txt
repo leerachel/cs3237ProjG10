@@ -1,0 +1,2 @@
+python-dotenv==0.14.0
+bleak==0.9.1
