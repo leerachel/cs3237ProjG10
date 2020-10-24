@@ -11,7 +11,9 @@ from cc2650 import LEDAndBuzzer, \
                    MagnetometerSensorMovementSensorMPU9250, \
                    MovementSensorMPU9250
 
-from store import append_data_to_csv, read_data_from_csv
+from store import append_data_to_csv, read_data_from_csv, \
+                insert_light_data_into_cloud_DB, insert_acc_data_into_cloud_DB, \
+                insert_mag_data_into_cloud_DB, insert_gyro_data_into_cloud_DB
 
 load_dotenv()
 
@@ -52,7 +54,10 @@ async def start_sensor(address):
                 final_dict[OpticalSensor.LIGHT_LABEL] = light_dict
                 await led_and_buzzer.notify(client, 0x00)
                 append_data_to_csv("data.csv", final_dict)
-
+                insert_light_data_into_cloud_DB(final_dict)
+                insert_acc_data_into_cloud_DB(final_dict)
+                insert_mag_data_into_cloud_DB(final_dict)
+                insert_gyro_data_into_cloud_DB(final_dict)
 
             if command == "exit":
                 return
