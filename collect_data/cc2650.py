@@ -49,10 +49,11 @@ class Sensor(Service):
         self.read_count = 0
         self.dict = {}
         # start the sensor on the device
-        write_value = bytearray([0x01])
-        await client.write_gatt_char(self.ctrl_uuid, write_value)
-
-        await client.write_gatt_char(self.period_uuid, sensorPeriod)
+        if self.ctrl_uuid:
+            write_value = bytearray([0x01])
+            await client.write_gatt_char(self.ctrl_uuid, write_value)
+        if self.period_uuid:
+            await client.write_gatt_char(self.period_uuid, sensorPeriod)
         # listen using the handler
         await client.start_notify(self.data_uuid, self.callback)
 
