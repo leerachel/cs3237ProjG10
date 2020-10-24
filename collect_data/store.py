@@ -13,13 +13,13 @@ from cc2650 import OpticalSensor, \
 
 import os.path
 
-Score_LABEL = "score"
+SCORE_LABEL = "score"
 
 FIELD_NAMES = [OpticalSensor.LIGHT_LABEL,
                MovementSensorMPU9250.ACCEL_LABEL,
                MovementSensorMPU9250.MAG_LABEL,
                MovementSensorMPU9250.GYRO_LABEL,
-               Score_LABEL]
+               SCORE_LABEL]
 
 
 def append_data_to_csv(file_path, data):
@@ -33,7 +33,7 @@ def append_data_to_csv(file_path, data):
             MovementSensorMPU9250.ACCEL_LABEL: json.dumps(data[MovementSensorMPU9250.ACCEL_LABEL]),
             MovementSensorMPU9250.MAG_LABEL: json.dumps(data[MovementSensorMPU9250.MAG_LABEL]),
             MovementSensorMPU9250.GYRO_LABEL: json.dumps(data[MovementSensorMPU9250.GYRO_LABEL]),
-            Score_LABEL: json.dumps(data[Score_LABEL])
+            SCORE_LABEL: json.dumps(data[SCORE_LABEL])
         })
 
 
@@ -53,6 +53,7 @@ def insert_light_data_into_cloud_DB(data):
                     'SensorId': OpticalSensor.LIGHT_LABEL,
                     'Timestamp': data[OpticalSensor.LIGHT_LABEL][idx][1],
                     'Value': Decimal(str(data[OpticalSensor.LIGHT_LABEL][idx][0])),
+                    'Score': data[SCORE_LABEL]
                     })
 
 def insert_acc_data_into_cloud_DB(data):
@@ -64,7 +65,8 @@ def insert_acc_data_into_cloud_DB(data):
                         'acc_X': Decimal(str(data[MovementSensorMPU9250.ACCEL_LABEL][idx][0])),
                         'acc_Y': Decimal(str(data[MovementSensorMPU9250.ACCEL_LABEL][idx][1])),
                         'acc_Z': Decimal(str(data[MovementSensorMPU9250.ACCEL_LABEL][idx][2]))
-                        }
+                        },
+                    'Score': data[SCORE_LABEL]
                     })
 
 def insert_mag_data_into_cloud_DB(data):
@@ -76,7 +78,8 @@ def insert_mag_data_into_cloud_DB(data):
                         'mag_x': Decimal(str(data[MovementSensorMPU9250.MAG_LABEL][idx][0])),
                         'mag_Y': Decimal(str(data[MovementSensorMPU9250.MAG_LABEL][idx][1])),
                         'mag_Z': Decimal(str(data[MovementSensorMPU9250.MAG_LABEL][idx][2])),
-                        }
+                        },
+                    'Score': data[SCORE_LABEL]
                     })
 
 def insert_gyro_data_into_cloud_DB(data):
@@ -88,5 +91,6 @@ def insert_gyro_data_into_cloud_DB(data):
                         'gyro_X': Decimal(str(data[MovementSensorMPU9250.GYRO_LABEL][idx][0])),
                         'gyro_Y': Decimal(str(data[MovementSensorMPU9250.GYRO_LABEL][idx][1])),
                         'gyro_Z': Decimal(str(data[MovementSensorMPU9250.GYRO_LABEL][idx][2])),
-                        }
+                        },
+                    'Score': data[SCORE_LABEL]
                     })

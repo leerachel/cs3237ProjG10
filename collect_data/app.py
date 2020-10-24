@@ -55,10 +55,10 @@ async def start_sensor(address):
                 await led_and_buzzer.notify(client, 0x00)
                 final_dict["score"] = True if input("Is it a score? (y/n)") == "y" else False
                 append_data_to_csv("data.csv", final_dict)
-                insert_light_data_into_cloud_DB(final_dict)
-                insert_acc_data_into_cloud_DB(final_dict)
-                insert_mag_data_into_cloud_DB(final_dict)
-                insert_gyro_data_into_cloud_DB(final_dict)
+                #insert_light_data_into_cloud_DB(final_dict)
+                #insert_acc_data_into_cloud_DB(final_dict)
+                #insert_mag_data_into_cloud_DB(final_dict)
+                #insert_gyro_data_into_cloud_DB(final_dict)
 
             if command == "exit":
                 return
