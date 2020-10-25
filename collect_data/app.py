@@ -53,16 +53,7 @@ async def start_sensor(address):
                 final_dict = await movement_sensor.stop_sensor(client)
                 final_dict[OpticalSensor.LIGHT_LABEL] = light_dict
                 await led_and_buzzer.notify(client, 0x00)
-                output = input("Is it a score? (y/n/o)")
-                if output=="y":
-                    score = 1
-                elif output=="n":
-                    score = 0
-                elif output=="o":
-                    score = -1
-                else:
-                    score = -1
-                final_dict["score"] = score
+                final_dict["score"] = True if input("Is it a score? (y/n)") == "y" else False
                 append_data_to_csv("data.csv", final_dict)
                 #insert_light_data_into_cloud_DB(final_dict)
                 #insert_acc_data_into_cloud_DB(final_dict)
