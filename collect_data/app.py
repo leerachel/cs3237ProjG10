@@ -9,7 +9,8 @@ from cc2650 import LEDAndBuzzer, \
                    AccelerometerSensorMovementSensorMPU9250, \
                    GyroscopeSensorMovementSensorMPU9250, \
                    MagnetometerSensorMovementSensorMPU9250, \
-                   MovementSensorMPU9250
+                   MovementSensorMPU9250, \
+                   BatterySensor
 
 from store import append_data_to_csv, read_data_from_csv, \
                 insert_light_data_into_cloud_DB, insert_acc_data_into_cloud_DB, \
@@ -27,6 +28,7 @@ async def start_sensor(address):
         acc_sensor = AccelerometerSensorMovementSensorMPU9250()
         gyro_sensor = GyroscopeSensorMovementSensorMPU9250()
         magneto_sensor = MagnetometerSensorMovementSensorMPU9250()
+        battery_sensor = BatterySensor()
         movement_sensor = MovementSensorMPU9250()
         movement_sensor.register(acc_sensor)
         movement_sensor.register(gyro_sensor)
@@ -68,6 +70,9 @@ async def start_sensor(address):
                 #insert_acc_data_into_cloud_DB(final_dict)
                 #insert_mag_data_into_cloud_DB(final_dict)
                 #insert_gyro_data_into_cloud_DB(final_dict)
+            
+            if command == "bat_cap":
+                await battery_sensor.read(client)
 
             if command == "exit":
                 return
