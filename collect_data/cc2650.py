@@ -74,7 +74,7 @@ class MovementSensorMPU9250SubService:
         raise NotImplementedError
 
 
-class BatterySensor(Sensor):
+class BatteryService(Service):
     def __init__(self):
         super().__init__()
         self.data_uuid = "00002a19-0000-1000-8000-00805f9b34fb"
