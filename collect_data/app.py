@@ -3,21 +3,41 @@ import os
 import asyncio
 import platform
 from bleak import BleakClient
+import paho.mqtt.client as mqtt
+import json
 
 from cc2650 import LEDAndBuzzer, \
                    OpticalSensor, \
                    AccelerometerSensorMovementSensorMPU9250, \
                    GyroscopeSensorMovementSensorMPU9250, \
                    MagnetometerSensorMovementSensorMPU9250, \
-                   MovementSensorMPU9250, \
-                   BatteryService
+                   MovementSensorMPU9250
 
 from store import append_data_to_csv, read_data_from_csv, \
                 insert_light_data_into_cloud_DB, insert_acc_data_into_cloud_DB, \
                 insert_mag_data_into_cloud_DB, insert_gyro_data_into_cloud_DB
 
+# Define Variables
+MQTT_HOST = "localhost"
+MQTT_PORT = 1883
+MQTT_KEEPALIVE_INTERVAL = 45
+MQTT_TOPIC = "helloTopic"
+MQTT_MSG = ""
+
 load_dotenv()
 
+# Define on_publish event function
+def on_publish(client, userdata, mid):
+    print("Message Published...")
+
+# Initiate MQTT Client
+mqttc = mqtt.Client()
+
+# Register publish callback function
+mqttc.on_publish = on_publish
+
+# Connect with MQTT Broker
+mqttc.connect(MQTT_HOST, MQTT_PORT, MQTT_KEEPALIVE_INTERVAL) 
 
 async def start_sensor(address):
     async with BleakClient(address) as client:
@@ -28,7 +48,6 @@ async def start_sensor(address):
         acc_sensor = AccelerometerSensorMovementSensorMPU9250()
         gyro_sensor = GyroscopeSensorMovementSensorMPU9250()
         magneto_sensor = MagnetometerSensorMovementSensorMPU9250()
-        battery_sensor = BatteryService()
         movement_sensor = MovementSensorMPU9250()
         movement_sensor.register(acc_sensor)
         movement_sensor.register(gyro_sensor)
@@ -66,15 +85,20 @@ async def start_sensor(address):
                     score = -1
                 final_dict["score"] = score
                 append_data_to_csv("data.csv", final_dict)
+                MQTT_MSG = json.dumps(final_dict)
+                mqttc.connect(MQTT_HOST, MQTT_PORT, MQTT_KEEPALIVE_INTERVAL) # Connect with MQTT Broker
+                mqttc.publish(MQTT_TOPIC,MQTT_MSG) # Publish message to MQTT Broker                          
+                mqttc.disconnect() # Disconnect from MQTT_Broker
                 #insert_light_data_into_cloud_DB(final_dict)
                 #insert_acc_data_into_cloud_DB(final_dict)
                 #insert_mag_data_into_cloud_DB(final_dict)
                 #insert_gyro_data_into_cloud_DB(final_dict)
-            
-            if command == "bat_cap":
-                await battery_sensor.read(client)
 
             if command == "exit":
+                MQTT_MSG = "lastshot"
+                mqttc.connect(MQTT_HOST, MQTT_PORT, MQTT_KEEPALIVE_INTERVAL) # Connect with MQTT Broker
+                mqttc.publish(MQTT_TOPIC,MQTT_MSG) # Publish message to MQTT Broker                          
+                mqttc.disconnect() # Disconnect from MQTT_Broker
                 return
 
 
@@ -95,4 +119,3 @@ if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     loop.run_until_complete(start_sensor(address))
     loop.close()
-    
