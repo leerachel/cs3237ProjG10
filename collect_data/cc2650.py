@@ -74,6 +74,18 @@ class MovementSensorMPU9250SubService:
         raise NotImplementedError
 
 
+class BatteryService(Service):
+    def __init__(self):
+        super().__init__()
+        self.data_uuid = "00002a19-0000-1000-8000-00805f9b34fb"
+    
+
+    async def read(self, client):
+        '''Returns the battery level in percent'''
+        battery_level = await client.read_gatt_char(self.data_uuid)
+        print("Battery Level: {0}%".format(int(battery_level[0])))
+
+
 class MovementSensorMPU9250(Sensor):
     GYRO_XYZ = 7
     ACCEL_XYZ = 7 << 3

@@ -113,10 +113,9 @@ if __name__ == "__main__":
     address = (
         os.environ.get('DEVICE_ADDRESS')
         if platform.system() != "Darwin"
-        else "6FFBA6AE-0802-4D92-B1CD-041BE4B4FEB9"
+        else "865D510F-A097-46DF-AE07-97F11B6161AF"
     )
 
     loop = asyncio.get_event_loop()
     loop.run_until_complete(start_sensor(address))
     loop.close()
-    

@@ -4,8 +4,8 @@ import boto3
 from decimal import Decimal
 
 # Get the service resource.
-dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table('SensorData')
+# dynamodb = boto3.resource('dynamodb')
+# table = dynamodb.Table('SensorData')
 #print(table.creation_date_time)
 
 from cc2650 import OpticalSensor, \
@@ -47,50 +47,50 @@ def read_data_from_csv(file_path):
         return data
 
 
-def insert_light_data_into_cloud_DB(data):
-    for idx in data[OpticalSensor.LIGHT_LABEL]:
-        table.put_item(Item={
-                    'SensorId': OpticalSensor.LIGHT_LABEL,
-                    'Timestamp': data[OpticalSensor.LIGHT_LABEL][idx][1],
-                    'Value': Decimal(str(data[OpticalSensor.LIGHT_LABEL][idx][0])),
-                    'Score': data[SCORE_LABEL]
-                    })
+# def insert_light_data_into_cloud_DB(data):
+#     for idx in data[OpticalSensor.LIGHT_LABEL]:
+#         table.put_item(Item={
+#                     'SensorId': OpticalSensor.LIGHT_LABEL,
+#                     'Timestamp': data[OpticalSensor.LIGHT_LABEL][idx][1],
+#                     'Value': Decimal(str(data[OpticalSensor.LIGHT_LABEL][idx][0])),
+#                     'Score': data[SCORE_LABEL]
+#                     })
 
-def insert_acc_data_into_cloud_DB(data):
-    for idx in data[MovementSensorMPU9250.ACCEL_LABEL]:
-        table.put_item(Item={
-                    'SensorId': MovementSensorMPU9250.ACCEL_LABEL,
-                    'Timestamp': data[MovementSensorMPU9250.ACCEL_LABEL][idx][3],
-                    'Value': {
-                        'acc_X': Decimal(str(data[MovementSensorMPU9250.ACCEL_LABEL][idx][0])),
-                        'acc_Y': Decimal(str(data[MovementSensorMPU9250.ACCEL_LABEL][idx][1])),
-                        'acc_Z': Decimal(str(data[MovementSensorMPU9250.ACCEL_LABEL][idx][2]))
-                        },
-                    'Score': data[SCORE_LABEL]
-                    })
+# def insert_acc_data_into_cloud_DB(data):
+#     for idx in data[MovementSensorMPU9250.ACCEL_LABEL]:
+#         table.put_item(Item={
+#                     'SensorId': MovementSensorMPU9250.ACCEL_LABEL,
+#                     'Timestamp': data[MovementSensorMPU9250.ACCEL_LABEL][idx][3],
+#                     'Value': {
+#                         'acc_X': Decimal(str(data[MovementSensorMPU9250.ACCEL_LABEL][idx][0])),
+#                         'acc_Y': Decimal(str(data[MovementSensorMPU9250.ACCEL_LABEL][idx][1])),
+#                         'acc_Z': Decimal(str(data[MovementSensorMPU9250.ACCEL_LABEL][idx][2]))
+#                         },
+#                     'Score': data[SCORE_LABEL]
+#                     })
 
-def insert_mag_data_into_cloud_DB(data):
-    for idx in data[MovementSensorMPU9250.MAG_LABEL]:
-        table.put_item(Item={
-                    'SensorId': MovementSensorMPU9250.MAG_LABEL,
-                    'Timestamp': data[MovementSensorMPU9250.MAG_LABEL][idx][3],
-                    'Value': {
-                        'mag_x': Decimal(str(data[MovementSensorMPU9250.MAG_LABEL][idx][0])),
-                        'mag_Y': Decimal(str(data[MovementSensorMPU9250.MAG_LABEL][idx][1])),
-                        'mag_Z': Decimal(str(data[MovementSensorMPU9250.MAG_LABEL][idx][2])),
-                        },
-                    'Score': data[SCORE_LABEL]
-                    })
+# def insert_mag_data_into_cloud_DB(data):
+#     for idx in data[MovementSensorMPU9250.MAG_LABEL]:
+#         table.put_item(Item={
+#                     'SensorId': MovementSensorMPU9250.MAG_LABEL,
+#                     'Timestamp': data[MovementSensorMPU9250.MAG_LABEL][idx][3],
+#                     'Value': {
+#                         'mag_x': Decimal(str(data[MovementSensorMPU9250.MAG_LABEL][idx][0])),
+#                         'mag_Y': Decimal(str(data[MovementSensorMPU9250.MAG_LABEL][idx][1])),
+#                         'mag_Z': Decimal(str(data[MovementSensorMPU9250.MAG_LABEL][idx][2])),
+#                         },
+#                     'Score': data[SCORE_LABEL]
+#                     })
 
-def insert_gyro_data_into_cloud_DB(data):
-    for idx in data[MovementSensorMPU9250.GYRO_LABEL]:
-        table.put_item(Item={
-                    'SensorId': MovementSensorMPU9250.GYRO_LABEL,
-                    'Timestamp': data[MovementSensorMPU9250.GYRO_LABEL][idx][3],
-                    'Value': { 
-                        'gyro_X': Decimal(str(data[MovementSensorMPU9250.GYRO_LABEL][idx][0])),
-                        'gyro_Y': Decimal(str(data[MovementSensorMPU9250.GYRO_LABEL][idx][1])),
-                        'gyro_Z': Decimal(str(data[MovementSensorMPU9250.GYRO_LABEL][idx][2])),
-                        },
-                    'Score': data[SCORE_LABEL]
-                    })
+# def insert_gyro_data_into_cloud_DB(data):
+#     for idx in data[MovementSensorMPU9250.GYRO_LABEL]:
+#         table.put_item(Item={
+#                     'SensorId': MovementSensorMPU9250.GYRO_LABEL,
+#                     'Timestamp': data[MovementSensorMPU9250.GYRO_LABEL][idx][3],
+#                     'Value': { 
+#                         'gyro_X': Decimal(str(data[MovementSensorMPU9250.GYRO_LABEL][idx][0])),
+#                         'gyro_Y': Decimal(str(data[MovementSensorMPU9250.GYRO_LABEL][idx][1])),
+#                         'gyro_Z': Decimal(str(data[MovementSensorMPU9250.GYRO_LABEL][idx][2])),
+#                         },
+#                     'Score': data[SCORE_LABEL]
+#                     })

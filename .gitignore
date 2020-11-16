@@ -1,6 +1,7 @@
 .env
 .idea
 venv
-.csv
+*.csv
+.ipynb_checkpoints
 
 __pycache__
